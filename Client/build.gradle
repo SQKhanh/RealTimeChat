@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version "7.1.2"
+}
+description = 'Client'
+repositories {
+    mavenCentral()
+}
+ext {
+    classMain = 'com.atbm.Main'
+}
+
+
+application {
+    mainClass = classMain
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': classMain
+        )
+    }
+}
+
+sourceSets {
+    main {
+        java {
+        }
+    }
+}
+
+dependencies {
+    
+}

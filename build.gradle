@@ -1,0 +1,41 @@
+allprojects {
+
+    group = 'KhanhDz'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+ext {
+    lombokVersion = '1.18.32'
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    dependencies {
+
+        implementation 'com.fasterxml.jackson.core:jackson-annotations:2.17.2'
+        implementation 'com.fasterxml.jackson.core:jackson-core:2.17.2'
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
+
+        implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.2'
+
+        implementation 'org.json:json:20240303'
+
+        // ---------- Lombok ----------
+        compileOnly "org.projectlombok:lombok:$lombokVersion"
+        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+        // ---------- Load các file jar trong libs folder ----------
+        implementation fileTree(dir: "$rootDir/libs", include: ['*.jar'])
+    }
+
+}
