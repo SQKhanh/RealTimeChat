@@ -299,13 +299,13 @@ public class ChatPanel extends javax.swing.JPanel {
     public void sendMessageToPanel(final String sender, final String text) {
 
         MessageBubblePanel bubble = new MessageBubblePanel(text, false);
-        jPanelMessageChat.add(bubble);
-        jPanelMessageChat.revalidate();
-        jPanelMessageChat.repaint();
 
         DataChat.saveMessage(sender, bubble);
 
-        if (memOnlineModel.contains(this.curMemChat) == true) {
+        if (sender.equals(this.curMemChat)) {
+            jPanelMessageChat.add(bubble);
+            jPanelMessageChat.revalidate();
+            jPanelMessageChat.repaint();
             SwingUtilities.invokeLater(() -> {
                 smoothScrollToBottom(jScrollPaneMessageChat, 300); // scroll trong 300ms
             });
