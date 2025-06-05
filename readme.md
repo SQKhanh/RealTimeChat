@@ -238,4 +238,3 @@ Nếu bạn hiểu được vòng lặp này, bạn làm được bất kỳ fea
 - ✨ Contributor tương lai là bạn đó!
 
 ---
-```
