@@ -192,7 +192,7 @@ Giao thức TCP gửi dạng:
 
 ---
 
-### 👶 Gợi ý cho sinh viên khóa dưới
+### 👶 Gợi ý
 
 - Nếu muốn debug:
   - Đặt breakpoint trong `ControllerMessage.onMessage()`
@@ -211,8 +211,6 @@ CMD → Message → Session → TCP
 ```
 
 Nếu bạn hiểu được vòng lặp này, bạn làm được bất kỳ feature nào.
-```
-
 
 ---
 
