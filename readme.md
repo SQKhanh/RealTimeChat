@@ -54,141 +54,155 @@ Mặc định kết nối tới `localhost:15555`.
 
 ---
 
-## 🧠 Phân tích luồng hoạt động chi tiết
+## 👨‍🏫 Hướng dẫn Onboarding cho Dev Mới
 
-> Phần này giúp bạn nắm được toàn bộ cơ chế vận hành từ UI → Logic → Network một cách tuần tự, dễ hiểu.
-
----
-
-### 🚦 1. Khởi động ứng dụng
-
-```
-Main.java (Client) → mở giao diện MainFrame → hiện panel đăng nhập (HomePanel)
-```
-
-- Swing sử dụng `invokeLater()` để đảm bảo UI chạy trên EDT
-- `MainFrame` có 2 panel chính: `HomePanel` và `ChatPanel`
+> Mục tiêu: giúp dev mới hiểu nhanh và chắc toàn bộ hệ thống dựa trên code thật, không lý thuyết suông.
 
 ---
 
-### 🔐 2. Đăng nhập
+### 🧩 Thành phần chính
 
-**Client**
+| Tầng | Tên class | Vai trò |
+|------|-----------|--------|
+| UI | `MainFrame`, `HomePanel`, `ChatPanel` | Giao diện đăng nhập, giao diện chat |
+| Logic | `ServerRequestManager` | Cầu nối UI ↔ TCP session |
+| Network | `Session` | Đóng/mở socket, đọc/ghi dữ liệu TCP |
+| Network | `MessageWriter` / `MessageReader` | Gửi / nhận packet theo giao thức |
+| Handler | `ControllerMessage` | Xử lý tin nhắn đến từ server |
+| Cache | `DataChat` | Lưu tin nhắn vào RAM để hiển thị lại |
+
+---
+
+## 🔄 Trình tự hoạt động chính
+
+### 1. Người dùng khởi động app
 ```java
-ServerRequestManager.connect() → tạo Session TCP
-→ gửi CMD.LOGIN (name + RSApub)
+Main.java → MainFrame.Instance.setVisible(true)
+→ hiện HomePanel (card layout)
 ```
 
-**Server**
-- Nhận CMD.LOGIN
-  - Nếu username đã tồn tại → gửi `isOK = false`
-  - Nếu chưa có → chấp nhận → gửi danh sách user đang online
+---
 
-**Client**
-- Nhận phản hồi → gọi `ControllerMessage.onMessage(CMD.LOGIN)`
-- Nếu thành công:
-  - Ẩn dialog
-  - Hiện `ChatPanel`
-  - Hiển thị danh sách user online
+### 2. Người dùng đăng nhập
+```text
+Giao diện HomePanel → gọi ServerRequestManager.connect(name, RSApub, RSApri)
+→ tạo Session (TCP), khởi động thread đọc & gửi
+→ gọi login() → tạo CMD.LOGIN → gửi name + RSApub lên server
+```
 
 ---
 
-### 🟢 3. Cập nhật trạng thái online
+### 3. Server trả về kết quả login
 
-**Server**
-- Mỗi khi user connect/disconnect
-  → Gửi `CMD.UPDATE_MEM_ONLINE (bool isOnline, String name)` cho toàn bộ user
+**Server side**
+- Trong `ServerRespondManager.java`, xử lý `CMD.LOGIN`
+  - Kiểm tra tên user trùng → `isOK = false`
+  - Nếu hợp lệ:
+    - Thêm vào `SessionManager`
+    - Gửi `isOK = true + danh sách online hiện tại`
 
-**Client**
-- `ControllerMessage.onMessage(CMD.UPDATE_MEM_ONLINE)`:
-  - Cập nhật danh sách online trên `ChatPanel`
+**Client side**
+- `ControllerMessage.onMessage(CMD.LOGIN)`:
+  - Nếu `isOK == true` → hiện `ChatPanel`, gọi `updateMemOnline(mems)`
+  - Nếu `false` → hiện dialog báo lỗi
 
 ---
 
-### 💬 4. Gửi tin nhắn
+### 4. Cập nhật trạng thái online
+
+**Server**
+- Khi có user connect/disconnect
+- Gửi `CMD.UPDATE_MEM_ONLINE (boolean isOnline, String name)` tới các client khác
 
 **Client**
+- `ControllerMessage.onMessage(CMD.UPDATE_MEM_ONLINE)` → gọi `ChatPanel.updateMemOnline(name, isOnline)` → update danh sách JList
+
+---
+
+### 5. Gửi tin nhắn
+
+**Client:**
 ```java
-User chọn người nhận → set curMemChat
-Nhập text → nhấn nút Gửi → gọi ServerRequestManager.sendChatMessage()
-→ gửi CMD.SEND_CHAT_MESSAGE (receiverName + message)
+ChatPanel → ServerRequestManager.sendChatMessage(receiver, message)
+→ tạo MessageWriter(CMD.SEND_CHAT_MESSAGE)
+→ ghi UTF: receiver, message → put vào session
 ```
 
-- Tin nhắn được render thành `MessageBubblePanel`
-- Lưu vào `DataChat.saveMessage()` để cache lại
+**Server:**
+- `ServerRespondManager` nhận CMD.SEND_CHAT_MESSAGE
+- Gửi `CMD.RECEIVE_CHAT_MESSAGE(sender, message)` tới người nhận
+
+**Client nhận:**
+- `ControllerMessage.onMessage(CMD.RECEIVE_CHAT_MESSAGE)` → gọi `ChatPanel.sendMessageToPanel(sender, message)`
 
 ---
 
-### 📩 5. Nhận tin nhắn
-
-**Server**
-- Nhận CMD.SEND_CHAT_MESSAGE → forward tới người nhận bằng:
-  ```java
-  CMD.RECEIVE_CHAT_MESSAGE (sender + text)
-  ```
+### 6. Lưu tin nhắn
 
 **Client**
-- `ControllerMessage.onMessage(CMD.RECEIVE_CHAT_MESSAGE)`:
-  - Nếu đang chat với `sender` → hiển thị ngay
-  - Nếu không → TODO: hiển thị thông báo mới
-
----
-
-### ⚙️ 6. Cấu trúc packet
-
-Giao thức TCP gửi dạng:
+- Dù gửi hay nhận, UI luôn gọi:
+```java
+DataChat.saveMessage(who, MessageBubblePanel)
 ```
-[ CMD (byte) ][ SIZE (int) ][ PAYLOAD (byte[]) ]
+→ lưu trong `Map<String, List<MessageBubblePanel>>`
+
+---
+
+## 📜 Sequence Diagram (text UML)
+
+```plaintext
+Client User      Client App         Server
+    |                 |                 |
+    |  UI nhập tên    |                 |
+    |---------------->|                 |
+    |                 | connect()       |
+    |                 |---------------->|
+    |                 |                 | accept socket
+    |                 | login()         |
+    |                 |---------------->|
+    |                 |   CMD.LOGIN     |
+    |                 |   name + RSApub |
+    |                 |                 |
+    |                 |                 | check trùng name
+    |                 |                 | send isOK + online list
+    |                 |<----------------|
+    | update UI       |                 |
+    |---------------->|                 |
+    |                 |                 |
+    | chọn người chat |                 |
+    |---------------->|                 |
+    | gõ & gửi        |                 |
+    |---------------->| sendChatMessage |
+    |                 | CMD.SEND_CHAT_MESSAGE
+    |                 |---------------->|
+    |                 |                 | relay:
+    |                 |                 | CMD.RECEIVE_CHAT_MESSAGE
+    |                 |<----------------|
+    | show bubble     |                 |
+    | save to DataChat|                 |
 ```
 
-- Đóng gói bằng `MessageWriter`
-- Đọc bằng `MessageReader`
-- Mỗi `Session` quản lý riêng việc gửi/nhận
+---
+
+## ✅ Checklist Dev mới cần hiểu
+
+| Việc cần hiểu | File cần đọc |
+|---------------|--------------|
+| Giao diện UI hoạt động thế nào? | `MainFrame.java`, `ChatPanel.java` |
+| Làm sao gửi CMD lên server? | `ServerRequestManager.java` |
+| Làm sao xử lý lệnh server trả về? | `ControllerMessage.java` |
+| TCP message đóng gói thế nào? | `MessageWriter.java` / `MessageReader.java` |
+| Socket được đọc/ghi ở đâu? | `Session.java` |
+| Làm sao lưu lại các message cũ? | `DataChat.java` |
 
 ---
 
-### 📦 7. Cơ chế xử lý song song
+## 💬 Lưu ý cho người mới
 
-- `Session.startReadMessage()` → đọc socket bằng VirtualThread
-- `Session.startSendMessage()` → gửi socket bằng VirtualThread
-- Gửi sử dụng `LinkedBlockingQueue`
-- Đảm bảo không block giao diện và đa luồng xử lý nhiều người
-
----
-
-### 📚 8. Lưu lịch sử tin nhắn (cache)
-
-- Mỗi tin nhắn gửi/nhận được lưu vào:
-  ```java
-  Map<String, List<MessageBubblePanel>> DataChat
-  ```
-- Khi chọn user → nạp lại toàn bộ tin nhắn từ cache
-- Cực nhẹ và nhanh vì nằm trong RAM
-
----
-
-### ☠️ 9. Mất kết nối
-
-- Nếu socket lỗi (client thoát, mạng chập chờn, vv.)
-  → `Session.dispose()` được gọi
-  → Đóng toàn bộ stream + UI hiện popup yêu cầu tắt app
-
----
-
-### 🧠 Tóm tắt class chính
-
-| Class | Vai trò |
-|-------|--------|
-| `MainFrame` | JFrame chính, quản lý UI |
-| `ChatPanel` | Giao diện khung chat |
-| `HomePanel` | Giao diện đăng nhập |
-| `MessageBubblePanel` | Bong bóng tin nhắn |
-| `Session` | Quản lý kết nối TCP |
-| `MessageReader/Writer` | Đọc/ghi packet |
-| `ControllerMessage` | Xử lý tin nhắn đến |
-| `ServerRequestManager` | Gửi lệnh tới server |
-| `DataChat` | Lưu tin nhắn trong RAM |
-| `CMD` | Định nghĩa các loại lệnh |
+- Mỗi lần gửi message là 1 thread ảo gửi qua TCP (nhẹ, không block)
+- Không được thao tác UI trong `Session` → phải thông qua Swing thread
+- Mọi UI xử lý đều đi từ `ControllerMessage` hoặc `ChatPanel`
+- Giao diện JList dùng `DefaultListModel` → muốn update thì `addElement()` / `removeElement()`
 
 ---
 
