@@ -28,15 +28,16 @@ public final class ServerRespondManager {
         }
     }
 
-    public void respondReceiveChatMessage(String sender, Session receiver, String text) throws Exception {
+    public void respondReceiveChatMessage(String sender, Session receiver, String text, String keyAES) throws Exception {
         try (var msg = new MessageWriter(CMD.RECEIVE_CHAT_MESSAGE)) {
             final var writer = msg.writer();
             writer.writeUTF(sender);
             writer.writeUTF(text);
+            writer.writeUTF(keyAES);
             receiver.putMessage(msg);
         }
     }
-    
+
     public void respondSendChatMessageFALSE(Session session) throws Exception {
         try (var msg = new MessageWriter(CMD.SEND_CHAT_MESSAGE)) {
             session.putMessage(msg);
@@ -57,11 +58,12 @@ public final class ServerRespondManager {
             final var writer = msg.writer();
             writer.writeBoolean(true);
 
-            var mems = SessionManager.getAllNameOnline();
+            var dataMem = SessionManager.getAllNameOnline();
 
-            writer.writeInt(mems.length);
-            for (var mem : mems) {
-                writer.writeUTF(mem);
+            writer.writeInt(dataMem.size());
+            for (var data : dataMem) {
+                writer.writeUTF(data[0]);
+                writer.writeUTF(data[1]);
             }
 
             session.putMessage(msg);

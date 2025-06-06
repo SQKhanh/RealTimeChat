@@ -26,14 +26,14 @@ public final class ControllerMessage {
                 case CMD.LOGIN -> {
 
                     final var name = msg.readUTF();
-                    final var RSApub = msg.readUTF();
+                    final var pubKeyRSA = msg.readUTF();
 
                     if (SessionManager.isAlreadyLogin(name)) {
                         ServerRespondManager.Instance.respondLoginFalse(session, "Đã có người sử dụng tên này rồi");
                         return;
                     }
 
-                    session.login(name, RSApub);
+                    session.login(name, pubKeyRSA);
                     ServerRespondManager.Instance.respondLoginOK(session);
 
                     System.out.println("done handle request login");
@@ -42,9 +42,10 @@ public final class ControllerMessage {
 
                     final var sendTo = msg.readUTF();
                     final var text = msg.readUTF();
+                    final var keyAES = msg.readUTF();
 
                     if (SessionManager.getSession(sendTo) instanceof Session receiver) {
-                        ServerRespondManager.Instance.respondReceiveChatMessage(session.getName(), receiver, text);
+                        ServerRespondManager.Instance.respondReceiveChatMessage(session.getName(), receiver, text,keyAES);
                     } else {
                         ServerRespondManager.Instance.respondSendChatMessageFALSE(session);
                     }

@@ -8,6 +8,8 @@ import com.atbm.logic.ServerNotify;
 import com.atbm.network.MessageWriter;
 import com.atbm.network.Session;
 import com.khanhdz.core.collection.KhanhDzMapReadWriteLock;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -24,13 +26,19 @@ public final class SessionManager {
      */
     private final static KhanhDzMapReadWriteLock<String, Session> sessions = new KhanhDzMapReadWriteLock<>();
 
-    public static String[] getAllNameOnline() {
+    /**
+     *
+     * @return [[name,pubKeyRSA],..]
+     */
+    public static List<String[]> getAllNameOnline() {
         try {
-            var maps = sessions.startRead();
+            var collection = sessions.startRead().values();
+            List<String[]> data = new ArrayList<>();
+            for (var session : collection) {
+                data.add(new String[]{session.getName(), session.getPubKeyRSA()});
+            }
 
-            // Ép kiểu sang String[]
-            var keys = maps.keySet().toArray(String[]::new);
-            return keys;
+            return data;
         } finally {
             sessions.doneRead();
         }

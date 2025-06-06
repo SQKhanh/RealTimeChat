@@ -23,7 +23,7 @@ import lombok.Getter;
 public final class Session {
 
     @Getter
-    private String name, RSApub = null;
+    private String name, pubKeyRSA = null;
 
     private final Socket socket;
     private final DataOutputStream dos;
@@ -44,9 +44,9 @@ public final class Session {
         messages = new LinkedBlockingQueue<>();
     }
 
-    public void login(String name, String RSApub) {
+    public void login(final String name, final String pubKeyRSA) {
         this.name = name;
-        this.RSApub = RSApub;
+        this.pubKeyRSA = pubKeyRSA;
         SessionManager.login(this);
     }
 

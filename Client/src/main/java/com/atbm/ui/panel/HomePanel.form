@@ -65,47 +65,22 @@
               </Group>
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="jLabel3" pref="176" max="32767" attributes="0"/>
-                              <Component id="jLabel2" max="32767" attributes="0"/>
-                          </Group>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="textFieldName" max="32767" attributes="0"/>
-                              <Component id="passwordFieldRSApub" max="32767" attributes="0"/>
-                          </Group>
-                      </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="jLabel4" min="-2" pref="176" max="-2" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="passwordFieldRSApri" pref="191" max="32767" attributes="0"/>
-                      </Group>
-                  </Group>
+                  <Component id="jLabel2" min="-2" pref="176" max="-2" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <Component id="textFieldName" pref="191" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace min="-2" pref="81" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="textFieldName" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="passwordFieldRSApub" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
-                      <Component id="passwordFieldRSApri" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace pref="100" max="32767" attributes="0"/>
+                  <EmptySpace pref="105" max="32767" attributes="0"/>
                   <Component id="jButton1" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="100" max="-2" attributes="0"/>
               </Group>
@@ -121,13 +96,7 @@
         <Component class="javax.swing.JLabel" name="jLabel2">
           <Properties>
             <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="T&#xea;n"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel3">
-          <Properties>
-            <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="RSA-public"/>
+            <Property name="text" type="java.lang.String" value="Nh&#x1ead;p t&#xea;n c&#x1ee7;a b&#x1ea1;n"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="jButton1">
@@ -137,22 +106,6 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
           </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel4">
-          <Properties>
-            <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="RSA-private"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JPasswordField" name="passwordFieldRSApub">
-          <Properties>
-            <Property name="toolTipText" type="java.lang.String" value="Nh&#x1ead;p kh&#xf3;a c&#xf4;ng khai RSA"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JPasswordField" name="passwordFieldRSApri">
-          <Properties>
-            <Property name="toolTipText" type="java.lang.String" value="Nh&#x1ead;p kh&#xf3;a b&#xed; m&#x1ead;t RSA"/>
-          </Properties>
         </Component>
       </SubComponents>
     </Container>

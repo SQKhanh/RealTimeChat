@@ -23,6 +23,7 @@ public final class ServerNotify {
             final var writer = msg.writer();
             writer.writeBoolean(isOnline);
             writer.writeUTF(session.getName());
+            writer.writeUTF(session.getPubKeyRSA());
             SessionManager.sendMessageAllSession(msg);
         } catch (Exception e) {
             e.printStackTrace();

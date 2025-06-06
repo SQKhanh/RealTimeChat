@@ -5,7 +5,9 @@
 package com.atbm;
 
 import com.atbm.network.Session;
+import java.io.PrintStream;
 import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +18,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Main {
 
+    static {
+        try {
+            System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8.name()));
+            System.setErr(new PrintStream(System.err, true, StandardCharsets.UTF_8.name()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     static final int port = 15555;
 
     static final ServerSocket serverSocket;

@@ -35,11 +35,7 @@ public class HomePanel extends javax.swing.JPanel {
         jPanel1 = new javax.swing.JPanel();
         textFieldName = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
-        jLabel4 = new javax.swing.JLabel();
-        passwordFieldRSApub = new javax.swing.JPasswordField();
-        passwordFieldRSApri = new javax.swing.JPasswordField();
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -48,10 +44,7 @@ public class HomePanel extends javax.swing.JPanel {
         textFieldName.setToolTipText("Nhập tên");
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Tên");
-
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("RSA-public");
+        jLabel2.setText("Nhập tên của bạn");
 
         jButton1.setText("Bắt đầu chat");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -59,13 +52,6 @@ public class HomePanel extends javax.swing.JPanel {
                 jButton1ActionPerformed(evt);
             }
         });
-
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("RSA-private");
-
-        passwordFieldRSApub.setToolTipText("Nhập khóa công khai RSA");
-
-        passwordFieldRSApri.setToolTipText("Nhập khóa bí mật RSA");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -77,37 +63,19 @@ public class HomePanel extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(textFieldName)
-                            .addComponent(passwordFieldRSApub)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(passwordFieldRSApri, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)))
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(textFieldName, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(81, 81, 81)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(textFieldName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(passwordFieldRSApub, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(passwordFieldRSApri, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 100, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 105, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addGap(100, 100, 100))
         );
@@ -142,19 +110,11 @@ public class HomePanel extends javax.swing.JPanel {
 
         // Lấy dữ liệu từ các field
         final var name = textFieldName.getText().trim();
-        final var rsaPrivate = new String(passwordFieldRSApri.getPassword()).trim();
-        final var rsaPublic = new String(passwordFieldRSApub.getPassword()).trim();
 
         final var errorMsg = new StringBuilder();
 
         if (name.isEmpty()) {
             errorMsg.append(" - Tên không được để trống\n");
-        }
-        if (rsaPrivate.isEmpty()) {
-            errorMsg.append(" - RSA Private Key không được để trống\n");
-        }
-        if (rsaPublic.isEmpty()) {
-            errorMsg.append(" - RSA Public Key không được để trống\n");
         }
 
         if (errorMsg.length() > 0) {
@@ -162,17 +122,15 @@ public class HomePanel extends javax.swing.JPanel {
             return;
         }
 
-        // TODO: Viết logic xử lý dữ liệu ở đây
         MyDialogMessage.Instance.setMessage("Dữ liệu hợp lệ, đang xử lý...");
         MyDialogMessage.Instance.setVisibleTRUE();
 
-        final var resultConnect = ServerRequestManager.Instance.connect(name, rsaPublic, rsaPrivate);
+        if (ServerRequestManager.Instance.connect(name) instanceof String notify) {
 
-        if (resultConnect == false) {
             MyDialogMessage.Instance.setVisibleFALSE();
             JOptionPane.showConfirmDialog(
                     MainFrame.Instance,
-                    "Không thể kết nối tới máy chủ",
+                    notify,
                     "Thông báo",
                     JOptionPane.DEFAULT_OPTION,
                     JOptionPane.INFORMATION_MESSAGE
@@ -202,11 +160,7 @@ public class HomePanel extends javax.swing.JPanel {
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPasswordField passwordFieldRSApri;
-    private javax.swing.JPasswordField passwordFieldRSApub;
     private javax.swing.JTextField textFieldName;
     // End of variables declaration//GEN-END:variables
 }

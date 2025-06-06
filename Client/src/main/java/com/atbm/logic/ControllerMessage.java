@@ -4,11 +4,16 @@
  */
 package com.atbm.logic;
 
+import com.atbm.data.DataChat;
+import com.atbm.logic.security.RSAUtil;
+import com.atbm.model.MemChat;
 import com.atbm.network.CMD;
 import com.atbm.network.Session;
 import com.atbm.network.MessageReader;
 import com.atbm.ui.MainFrame;
 import com.atbm.ui.dialog.MyDialogMessage;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import lombok.AccessLevel;
@@ -42,13 +47,22 @@ public final class ControllerMessage {
                                 JOptionPane.INFORMATION_MESSAGE
                         );
 
-                        final var mems = new String[msg.readInt()];
-                        for (int i = 0; i < mems.length; i++) {
-                            mems[i] = msg.readUTF();
+                        final List<MemChat> memChats = new ArrayList<>();
+                        final var memSize = msg.readInt();
+                        for (int i = 0; i < memSize; i++) {
+                            final var name = msg.readUTF();
+                            final var keyBase64 = msg.readUTF();
+                            try {
+                                memChats.add(new MemChat(name, RSAUtil.base64ToPublicKey(keyBase64)));
+                            } catch (Exception e) {
+                                System.out.println("LỖI GIẢI MÃ pubkey của " + name);
+                            }
                         }
 
+                        DataChat.load(memChats);
+
                         SwingUtilities.invokeLater(() -> {
-                            MainFrame.Instance.getChatPanel1().updateMemOnline(mems);
+                            MainFrame.Instance.getChatPanel1().updateMemOnline(memChats);
 
                             MainFrame.Instance.showPanelChat();
                         });
@@ -57,6 +71,10 @@ public final class ControllerMessage {
                 case CMD.UPDATE_MEM_ONLINE -> {
                     final var isOnline = msg.readBoolean();
                     final var name = msg.readUTF();
+                    final var pubKeyRSA = msg.readUTF();
+
+                    DataChat.updateMemOnline(name, pubKeyRSA, isOnline);
+
                     MainFrame.Instance.getChatPanel1().updateMemOnline(name, isOnline);
                     System.out.println("reload mem online");
                 }
@@ -75,9 +93,21 @@ public final class ControllerMessage {
                 }
                 case CMD.RECEIVE_CHAT_MESSAGE -> {
                     final var sender = msg.readUTF();
-                    final var text = msg.readUTF();
+                    var text = msg.readUTF();
+                    final var keyAES = msg.readUTF();
 
                     System.out.println("nhận tin nhắn từ %s, nội dung: %s".formatted(sender, text));
+
+                    try {
+                        text = ServerRequestManager.Instance.decryptMesage(text, keyAES);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return;
+                    }
+
+                    System.out.println("sau giải mã ");
+
+                    System.out.println("nội dung: %s".formatted(text));
 
                     MainFrame.Instance.getChatPanel1().sendMessageToPanel(sender, text);
 

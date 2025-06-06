@@ -96,7 +96,6 @@
                           <Component id="jScrollPane1" min="-2" pref="150" max="-2" attributes="0"/>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
-                      <Component id="jButtonXoaTinNhan" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -109,11 +108,9 @@
                   <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="jScrollPane1" min="-2" pref="120" max="-2" attributes="0"/>
-                  <EmptySpace pref="110" max="32767" attributes="0"/>
+                  <EmptySpace min="-2" pref="54" max="-2" attributes="0"/>
                   <Component id="jButtonChat" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="jButtonXoaTinNhan" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -152,11 +149,6 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonChatActionPerformed"/>
           </Events>
-        </Component>
-        <Component class="javax.swing.JButton" name="jButtonXoaTinNhan">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="x&#xf3;a tin nh&#x1eaf;n"/>
-          </Properties>
         </Component>
       </SubComponents>
     </Container>

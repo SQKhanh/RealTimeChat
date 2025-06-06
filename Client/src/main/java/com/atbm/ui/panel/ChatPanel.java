@@ -6,6 +6,7 @@ package com.atbm.ui.panel;
 
 import com.atbm.data.DataChat;
 import com.atbm.logic.ServerRequestManager;
+import com.atbm.model.MemChat;
 import com.atbm.ui.MainFrame;
 import java.awt.Component;
 import java.util.List;
@@ -23,7 +24,7 @@ import javax.swing.Timer;
  */
 public class ChatPanel extends javax.swing.JPanel {
 
-    private String curMemChat;
+    private MemChat curMemChat;
 
     private DefaultListModel<String> memOnlineModel = new DefaultListModel<>();
 
@@ -50,7 +51,6 @@ public class ChatPanel extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         jListMemOnline = new javax.swing.JList<>();
         jButtonChat = new javax.swing.JButton();
-        jButtonXoaTinNhan = new javax.swing.JButton();
         jScrollPaneMessageChat = new javax.swing.JScrollPane();
         jPanelMessageChat = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
@@ -77,8 +77,6 @@ public class ChatPanel extends javax.swing.JPanel {
             }
         });
 
-        jButtonXoaTinNhan.setText("xóa tin nhắn");
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -90,8 +88,7 @@ public class ChatPanel extends javax.swing.JPanel {
                     .addComponent(jButtonChat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jButtonXoaTinNhan, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -101,11 +98,9 @@ public class ChatPanel extends javax.swing.JPanel {
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 110, Short.MAX_VALUE)
+                .addGap(54, 54, 54)
                 .addComponent(jButtonChat)
-                .addGap(18, 18, 18)
-                .addComponent(jButtonXoaTinNhan)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanelMessageChat.setLayout(new javax.swing.BoxLayout(jPanelMessageChat, javax.swing.BoxLayout.LINE_AXIS));
@@ -181,21 +176,21 @@ public class ChatPanel extends javax.swing.JPanel {
         jScrollPaneMessageChat.getVerticalScrollBar().setUnitIncrement(20);
     }
 
-    public void updateMemOnline(String[] mems) {
+    public void updateMemOnline(List<MemChat> mems) {
         memOnlineModel.clear();
         for (var mem : mems) {
-            memOnlineModel.addElement(mem);
+            memOnlineModel.addElement(mem.getName());
         }
     }
 
-    public void updateMemOnline(String mem, boolean isOnline) {
+    public void updateMemOnline(String name, boolean isOnline) {
         SwingUtilities.invokeLater(() -> {
             if (isOnline) {
-                if (memOnlineModel.contains(mem) == false) { // tránh add trùng
-                    memOnlineModel.addElement(mem);
+                if (memOnlineModel.contains(name) == false) { // tránh add trùng
+                    memOnlineModel.addElement(name);
                 }
             } else {
-                memOnlineModel.removeElement(mem);
+                memOnlineModel.removeElement(name);
             }
             this.jListMemOnline.revalidate();
             this.jListMemOnline.repaint();
@@ -239,7 +234,7 @@ public class ChatPanel extends javax.swing.JPanel {
             );
             return;
         }
-        if (memOnlineModel.contains(this.curMemChat) == false) {
+        if (memOnlineModel.contains(this.curMemChat.getName()) == false) {
             JOptionPane.showConfirmDialog(
                     MainFrame.Instance,
                     "Người nhận đang ngoại tuyến",
@@ -296,21 +291,23 @@ public class ChatPanel extends javax.swing.JPanel {
         timer.start();
     }
 
-    public void sendMessageToPanel(final String sender, final String text) {
+    public void sendMessageToPanel(final String name, String text) {
 
-        MessageBubblePanel bubble = new MessageBubblePanel(text, false);
+        if (DataChat.getMem(name) instanceof MemChat mem) {
+            MessageBubblePanel bubble = new MessageBubblePanel(text, false);
 
-        DataChat.saveMessage(sender, bubble);
+            DataChat.saveMessage(mem, bubble);
 
-        if (sender.equals(this.curMemChat)) {
-            jPanelMessageChat.add(bubble);
-            jPanelMessageChat.revalidate();
-            jPanelMessageChat.repaint();
-            SwingUtilities.invokeLater(() -> {
-                smoothScrollToBottom(jScrollPaneMessageChat, 300); // scroll trong 300ms
-            });
-        } else {
-            // TODO: thông báo nhận được tin nhắn mới
+            if (mem.equals(this.curMemChat)) {
+                jPanelMessageChat.add(bubble);
+                jPanelMessageChat.revalidate();
+                jPanelMessageChat.repaint();
+                SwingUtilities.invokeLater(() -> {
+                    smoothScrollToBottom(jScrollPaneMessageChat, 300); // scroll trong 300ms
+                });
+            } else {
+                // TODO: thông báo nhận được tin nhắn mới
+            }
         }
 
     }
@@ -340,29 +337,38 @@ public class ChatPanel extends javax.swing.JPanel {
             );
             return;
         }
-
-        if (memSelected.equals(this.curMemChat)) {
-            JOptionPane.showConfirmDialog(
-                    MainFrame.Instance,
-                    "Đang chat với người này rồi",
-                    "Thông báo",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-            return;
-        }
-
-        this.curMemChat = memSelected;
-        this.jLabelThongTinNguoiChat.setText("Đang chat với: " + curMemChat);
-        System.out.println("set new cur mem chat ?? " + curMemChat);
-        this.jPanelMessageChat.removeAll();
-
-        if (DataChat.getData(curMemChat) instanceof List<MessageBubblePanel> datas) {
-            for (var data : datas) {
-                this.jPanelMessageChat.add(data);
+        if (this.curMemChat != null) {
+            if (memSelected.equals(this.curMemChat.getName())) {
+                JOptionPane.showConfirmDialog(
+                        MainFrame.Instance,
+                        "Đang chat với người này rồi",
+                        "Thông báo",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+                return;
             }
         }
 
+        if (DataChat.getMem(memSelected) instanceof MemChat memChat) {
+            this.curMemChat = memChat;
+            this.jLabelThongTinNguoiChat.setText("Đang chat với: " + memSelected);
+            System.out.println("set new cur mem chat ?? " + memSelected);
+            this.jPanelMessageChat.removeAll();
+
+            for (var data : memChat.getMessages()) {
+                this.jPanelMessageChat.add(data);
+            }
+            return;
+        }
+
+        JOptionPane.showConfirmDialog(
+                MainFrame.Instance,
+                "Không thể thực hiện, lỗi không xác định",
+                "Thông báo",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }//GEN-LAST:event_jButtonChatActionPerformed
 
 
@@ -370,7 +376,6 @@ public class ChatPanel extends javax.swing.JPanel {
     private javax.swing.JButton jButtonChat;
     private javax.swing.JButton jButtonFile;
     private javax.swing.JButton jButtonGui;
-    private javax.swing.JButton jButtonXoaTinNhan;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabelThongTinNguoiChat;

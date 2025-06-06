@@ -4,8 +4,10 @@
  */
 package com.atbm.data;
 
+import com.atbm.logic.security.RSAUtil;
+import com.atbm.model.MemChat;
 import com.atbm.ui.panel.MessageBubblePanel;
-import java.util.ArrayList;
+import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,21 +21,44 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DataChat {
 
-    private final static Map<String, List<MessageBubblePanel>> dataChat = new HashMap<>();
+    private final static Map<String, MemChat> dataChat = new HashMap<>();
 
-
-    public static void saveMessage(String curChat, MessageBubblePanel message) {
-        var messages = getData(curChat);
-        if (messages == null) {
-            messages = new ArrayList<>();
-        }
-        messages.add(message);
-
-        dataChat.put(curChat, messages);
+    public static MemChat getMem(String name) {
+        return dataChat.getOrDefault(name, null);
     }
 
-    public static List<MessageBubblePanel> getData(String key) {
-        return dataChat.getOrDefault(key, null);
+    public static void updateMemOnline(String name, String keyBase64, boolean online) {
+        if (online) {
+            PublicKey pubKey;
+            try {
+                pubKey = RSAUtil.base64ToPublicKey(keyBase64);
+            } catch (Exception e) {
+                pubKey = null;
+            }
+            if (pubKey == null) {
+                dataChat.remove(name);
+                return;
+            }
+
+            if (dataChat.getOrDefault(name, null) instanceof MemChat mem) {
+                mem.changepubKeyRSA(pubKey);
+            } else {
+                dataChat.put(name, new MemChat(name, pubKey));
+            }
+        } else {
+            dataChat.remove(name);
+        }
+    }
+
+    public static void saveMessage(MemChat mem, MessageBubblePanel message) {
+        mem.getMessages().add(message);
+    }
+
+    public static void load(List<MemChat> memChats) {
+        dataChat.clear();
+        for (MemChat memChat : memChats) {
+            dataChat.put(memChat.getName(), memChat);
+        }
     }
 
 }
